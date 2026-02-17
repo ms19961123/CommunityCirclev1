@@ -1,4 +1,4 @@
-import { Shield, ShieldCheck, Mail, Phone, IdCard } from "lucide-react";
+import { Shield, ShieldCheck, Mail, Phone, IdCardIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -114,7 +114,7 @@ export function TrustBadge({
                 isSmall && "px-1.5 py-0"
               )}
             >
-              <IdCard className={cn("shrink-0", isSmall ? "h-3 w-3" : "h-3.5 w-3.5")} />
+              <IdCardIcon className={cn("shrink-0", isSmall ? "h-3 w-3" : "h-3.5 w-3.5")} />
               {!isSmall && (
                 <span className="text-xs">ID Verified (Coming Soon)</span>
               )}
