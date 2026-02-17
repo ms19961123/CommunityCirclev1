@@ -1,0 +1,242 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  HOST
+  ADMIN
+}
+
+enum EventCategory {
+  WALK
+  PLAYGROUND
+  LIBRARY
+  CRAFTS
+  SPORTS
+  OTHER
+}
+
+enum IndoorOutdoor {
+  INDOOR
+  OUTDOOR
+  MIXED
+}
+
+enum EventStatus {
+  ACTIVE
+  CANCELLED
+  REMOVED
+}
+
+enum RSVPStatus {
+  GOING
+  CANCELLED
+}
+
+enum ReportTargetType {
+  USER
+  EVENT
+}
+
+enum ReportReason {
+  HARASSMENT
+  HATE
+  UNSAFE
+  SPAM
+  POLITICS
+  OTHER
+}
+
+enum ReportStatus {
+  OPEN
+  RESOLVED
+}
+
+enum FlagTargetType {
+  USER
+  EVENT
+}
+
+enum FlagRule {
+  PROFANITY
+  POLITICS
+  OTHER
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String?
+  name         String
+  role         Role      @default(USER)
+  createdAt    DateTime  @default(now())
+  suspendedAt  DateTime?
+
+  profile          Profile?
+  events           Event[]
+  rsvps            RSVP[]
+  messages         Message[]
+  reportsCreated   Report[]        @relation("ReporterReports")
+  reportsResolved  Report[]        @relation("ResolverReports")
+  blocksInitiated  Block[]         @relation("BlockerBlocks")
+  blocksReceived   Block[]         @relation("BlockedBlocks")
+  feedbacks        Feedback[]
+  helpRequests     HelpRequest[]
+}
+
+model Profile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  city            String
+  lat             Float
+  lng             Float
+  radiusMiles     Int       @default(5)
+  interests       String[]
+  kidsAgeRanges   String[]
+  screenLightMode Boolean   @default(false)
+  emailVerifiedAt DateTime?
+  phoneVerifiedAt DateTime?
+  idVerifiedAt    DateTime?
+  trustScore      Int       @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([city])
+}
+
+model Event {
+  id                   String        @id @default(cuid())
+  hostUserId           String
+  title                String
+  description          String
+  category             EventCategory
+  startAt              DateTime
+  durationMins         Int
+  indoorOutdoor        IndoorOutdoor
+  ageMin               Int
+  ageMax               Int
+  maxAttendees         Int
+  noDevices            Boolean       @default(false)
+  locationLabelPublic  String
+  locationNotesPrivate String
+  lat                  Float
+  lng                  Float
+  status               EventStatus   @default(ACTIVE)
+  createdAt            DateTime      @default(now())
+
+  host          User           @relation(fields: [hostUserId], references: [id], onDelete: Cascade)
+  rsvps         RSVP[]
+  messageThread MessageThread?
+  flags         Flag[]
+  feedbacks     Feedback[]
+
+  @@index([startAt])
+  @@index([category])
+  @@index([lat, lng])
+}
+
+model RSVP {
+  id        String     @id @default(cuid())
+  eventId   String
+  userId    String
+  status    RSVPStatus @default(GOING)
+  checkedInAt DateTime?
+  createdAt DateTime   @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([eventId])
+}
+
+model MessageThread {
+  id       String @id @default(cuid())
+  eventId  String @unique
+
+  event    Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  messages Message[]
+}
+
+model Message {
+  id           String   @id @default(cuid())
+  threadId     String
+  senderUserId String
+  body         String
+  createdAt    DateTime @default(now())
+
+  thread MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender User          @relation(fields: [senderUserId], references: [id], onDelete: Cascade)
+}
+
+model Report {
+  id               String           @id @default(cuid())
+  reporterUserId   String
+  targetType       ReportTargetType
+  targetId         String
+  reason           ReportReason
+  notes            String?
+  status           ReportStatus     @default(OPEN)
+  createdAt        DateTime         @default(now())
+  resolvedAt       DateTime?
+  resolvedByUserId String?
+
+  reporter   User  @relation("ReporterReports", fields: [reporterUserId], references: [id], onDelete: Cascade)
+  resolvedBy User? @relation("ResolverReports", fields: [resolvedByUserId], references: [id])
+
+  @@index([status])
+}
+
+model Block {
+  id            String   @id @default(cuid())
+  blockerUserId String
+  blockedUserId String
+  createdAt     DateTime @default(now())
+
+  blocker User @relation("BlockerBlocks", fields: [blockerUserId], references: [id], onDelete: Cascade)
+  blocked User @relation("BlockedBlocks", fields: [blockedUserId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerUserId, blockedUserId])
+}
+
+model Flag {
+  id         String         @id @default(cuid())
+  targetType FlagTargetType
+  targetId   String
+  rule       FlagRule
+  createdAt  DateTime       @default(now())
+
+  event Event? @relation(fields: [targetId], references: [id], onDelete: Cascade)
+}
+
+model Feedback {
+  id       String   @id @default(cuid())
+  eventId  String
+  userId   String
+  rating   Int
+  tags     String[]
+  createdAt DateTime @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+}
+
+model HelpRequest {
+  id        String   @id @default(cuid())
+  userId    String?
+  name      String
+  email     String
+  subject   String
+  message   String
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
