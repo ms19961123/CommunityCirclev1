@@ -640,7 +640,7 @@ export default function EventDetailPage() {
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-6 w-6 text-emerald-600" />
                   <h3 className="text-xl font-bold text-emerald-800 dark:text-emerald-200">
-                    You're going!
+                    You&apos;re going!
                   </h3>
                 </div>
 
@@ -705,7 +705,7 @@ export default function EventDetailPage() {
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-6 w-6 text-emerald-600" />
                   <h3 className="text-lg font-bold text-emerald-800 dark:text-emerald-200">
-                    You're attending this event
+                    You&apos;re attending this event
                   </h3>
                 </div>
 
