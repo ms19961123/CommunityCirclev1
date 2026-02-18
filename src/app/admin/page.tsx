@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
-import Admin from "@/components/Admin";
+import Admin from "./Admin";
 
 export default function Page() {
-  return <Admin />;
+  return <AdminPage />;
 }
