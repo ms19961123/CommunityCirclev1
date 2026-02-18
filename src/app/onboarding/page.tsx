@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import Onboarrding from "./Onboarding";
+import OnboardingPage from "./OnboardingPage";
 
 export default function Page() {
   return <OnboardingPage />;
