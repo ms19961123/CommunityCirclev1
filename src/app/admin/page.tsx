@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import AdminPage from "./AdminPage";
+import AdminPage from "./Admin";
 
 export default function Page() {
   return <AdminPage />;
