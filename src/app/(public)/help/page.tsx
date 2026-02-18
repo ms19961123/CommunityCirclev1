@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import Help from "./Help";
+import HelpPage from "./HelpPage";
 
 export default function Page() {
   return <HelpPage />;
